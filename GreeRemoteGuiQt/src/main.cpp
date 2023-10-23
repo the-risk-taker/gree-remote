@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 
     a.setAttribute(Qt::AA_EnableHighDpiScaling);
 
-    qCInfo(MainLog) << "initializing";
+    qInfo() << "initializing";
 
     DeviceFinder dh;
 
@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     w.show();
 
     QObject::connect(&dh, &DeviceFinder::scanFinshed, [] {
-        qCInfo(MainLog) << "scanning finished";
+        qInfo() << "scanning finished";
     });
     QObject::connect(&w, &MainWindow::scanInitiated, &dh, &DeviceFinder::scan);
     QObject::connect(&dh, &DeviceFinder::scanFinshed, &w, &MainWindow::onScanFinished);
@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 
     auto exitCode = a.exec();
 
-    qCInfo(MainLog) << "finished with exit code" << exitCode;
+    qInfo() << "finished with exit code" << exitCode;
 
     return exitCode;
 }

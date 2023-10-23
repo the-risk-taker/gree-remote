@@ -19,7 +19,7 @@ DeviceFinder::DeviceFinder(QObject *parent)
     , m_socket(new QUdpSocket(this))
     , m_timer(new QTimer(this))
 {
-    qCInfo(DeviceFinderLog) << "initializing";
+    qDebug() << "initializing";
 
     connect(m_socket, &QUdpSocket::readyRead, this, &DeviceFinder::socketReadyRead);
 
@@ -31,22 +31,22 @@ void DeviceFinder::scan()
 {
     if (m_state != State::Idle)
     {
-        qCWarning(DeviceFinderLog) << "scanning can only be initiated in Idle state";
+        qWarning() << "scanning can only be initiated in Idle state";
         return;
     }
 
     m_state = State::Scanning;
 
-    qCInfo(DeviceFinderLog) << "scanning started";
+    qDebug() << "scanning started";
 
     if (!m_socket->isOpen())
     {
-        qCDebug(DeviceFinderLog) << "opening UDP socket";
+        qDebug() << "opening UDP socket";
         m_socket->open(QIODevice::ReadWrite);
     }
 
     auto written = m_socket->writeDatagram(R"({"t":"scan"})", QHostAddress{ "192.168.1.255" }, 7000);
-    qCDebug(DeviceFinderLog) << "written datagram length:" << written;
+    qDebug() << "written datagram length:" << written;
 
     m_timer->start(2000);
 }
@@ -75,7 +75,7 @@ QPointer<Device> DeviceFinder::getDeviceById(const QString& id)
 
         if (existing == m_descriptors.cend())
         {
-            qCWarning(DeviceFinderLog) << "no descriptor found for the device ID" << id;
+            qWarning() << "no descriptor found for the device ID" << id;
             return {};
         }
 
@@ -87,23 +87,23 @@ QPointer<Device> DeviceFinder::getDeviceById(const QString& id)
 
 void DeviceFinder::socketReadyRead()
 {
-    qCDebug(DeviceFinderLog) << "socket ready read";
+    qDebug() << "socket ready read";
 
     char datagram[65536] = { 0 };
     QHostAddress remoteAddress;
     uint16_t remotePort = 0;
     auto length = m_socket->readDatagram(datagram, sizeof(datagram), &remoteAddress, &remotePort);
-    qCDebug(DeviceFinderLog) << "received datagram from" << remoteAddress << ":" << remotePort << ", length:" << length;
+    qDebug() << "received datagram from" << remoteAddress << ":" << remotePort << ", length:" << length;
 
     if (m_state == State::Scanning)
     {
-        qCInfo(DeviceFinderLog) << "processing scan results";
+        qDebug() << "processing scan results";
         processScanResponse(QByteArray(datagram, length), remoteAddress, remotePort);
         m_timer->start();
     }
     else if (m_state == State::Binding)
     {
-        qCInfo(DeviceFinderLog) << "processing bind results";
+        qDebug() << "processing bind results";
         processBindResponse(QByteArray(datagram, length));
         m_timer->start();
     }
@@ -111,11 +111,11 @@ void DeviceFinder::socketReadyRead()
 
 void DeviceFinder::timerTimeout()
 {
-    qCDebug(DeviceFinderLog) << "timer timeout";
+    qDebug() << "timer timeout";
 
     if (m_state == State::Scanning)
     {
-        qCInfo(DeviceFinderLog) << "scanning finished";
+        qDebug() << "scanning finished";
 
         m_state = State::Idle;
         emit scanFinshed();
@@ -123,25 +123,25 @@ void DeviceFinder::timerTimeout()
     }
     else if (m_state == State::Binding)
     {
-        qCInfo(DeviceFinderLog) << "binding finished";
+        qDebug() << "binding finished";
 
         m_state = State::Idle;
         emit bindingFinished();
     }
     else
     {
-        qCWarning(DeviceFinderLog) << "timer timeout in Idle state";
+        qWarning() << "timer timeout in Idle state";
     }
 }
 
 void DeviceFinder::processScanResponse(const QByteArray response, const QHostAddress& remoteAddress, uint16_t remotePort)
 {
-    qCDebug(DeviceFinderLog) << "processing scan response" << response;
+    qDebug() << "processing scan response" << response;
 
     QJsonObject pack;
     if (!ProtocolUtils::readPackFromResponse(response, Crypto::GenericAESKey, pack))
     {
-        qCWarning(DeviceFinderLog) << "failed to read pack from response";
+        qWarning() << "failed to read pack from response";
         return;
     }
 
@@ -153,7 +153,7 @@ void DeviceFinder::processScanResponse(const QByteArray response, const QHostAdd
 
     if (existing != m_descriptors.cend())
     {
-        qCInfo(DeviceFinderLog) << "device already added:" << id;
+        qDebug() << "device already added:" << id;
         return;
     }
 
@@ -170,7 +170,7 @@ void DeviceFinder::bindDevices()
 {
     if (m_state != State::Idle)
     {
-        qCWarning(DeviceFinderLog) << "binding can only be initiated in Idle state";
+        qWarning() << "binding can only be initiated in Idle state";
         return;
     }
 
@@ -192,7 +192,7 @@ void DeviceFinder::bindDevices()
         auto&& encryptedBindingPacket = Crypto::encryptPack(bindingPacket, Crypto::GenericAESKey);
         auto&& request = ProtocolUtils::createDeviceRequest(encryptedBindingPacket, 1);
 
-        qCDebug(DeviceFinderLog) << "sending bind request to" << device.address << ":" << device.port << ":" << request;
+        qDebug() << "sending bind request to" << device.address << ":" << device.port << ":" << request;
 
         m_socket->writeDatagram(request, device.address, device.port);
     });
@@ -202,7 +202,7 @@ void DeviceFinder::bindDevices()
     }
     else{
         //end bind state - nothing new to bind.
-        qCInfo(DeviceFinderLog) << "binding finished without new devices found";
+        qDebug() << "binding finished without new devices found";
 
         m_state = State::Idle;
     }
@@ -210,23 +210,23 @@ void DeviceFinder::bindDevices()
 
 void DeviceFinder::processBindResponse(const QByteArray &response)
 {
-    qCDebug(DeviceFinderLog) << "processing bind response:" << response;
+    qDebug() << "processing bind response:" << response;
 
     QJsonObject pack;
     if (!ProtocolUtils::readPackFromResponse(response, Crypto::GenericAESKey, pack))
     {
-        qCWarning(DeviceFinderLog) << "failed to read pack from response";
+        qWarning() << "failed to read pack from response";
         return;
     }
 
-    qCDebug(DeviceFinderLog) << "bind response JSON:" << pack;
+    qDebug() << "bind response JSON:" << pack;
 
     auto&& key = pack["key"].toString();
     auto&& mac = pack["mac"].toString();
 
     if (key.isEmpty() || mac.isEmpty())
     {
-        qCWarning(DeviceFinderLog) << "binding failed, response misses manadtory fields";
+        qWarning() << "binding failed, response misses manadtory fields";
         return;
     }
 
@@ -236,14 +236,14 @@ void DeviceFinder::processBindResponse(const QByteArray &response)
 
     if (device == m_descriptors.end())
     {
-        qCWarning(DeviceFinderLog) << "no device found for this binding response";
+        qWarning() << "no device found for this binding response";
         return;
     }
 
     device->key = key;
     device->bound = true;
 
-    qCInfo(DeviceFinderLog) << "device bound:" << mac;
+    qDebug() << "device bound:" << mac;
 
     emit deviceBound(*device);
 }
