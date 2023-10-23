@@ -40,3 +40,4 @@
 
 # Qt shadow build directories
 build-*
+build

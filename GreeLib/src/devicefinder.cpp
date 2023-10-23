@@ -9,6 +9,8 @@
 #include <QTimer>
 #include <QUdpSocket>
 
+#include <stdexcept>
+
 Q_DECLARE_LOGGING_CATEGORY(DeviceFinderLog)
 Q_LOGGING_CATEGORY(DeviceFinderLog, "DeviceFinder")
 
@@ -65,7 +67,7 @@ QPointer<Device> DeviceFinder::getDeviceById(const QString& id)
     {
         return m_devices.at(id);
     }
-    catch (std::out_of_range)
+    catch (std::out_of_range&)
     {
         auto&& existing = std::find_if(m_descriptors.cbegin(), m_descriptors.cend(), [&id](const DeviceDescriptor& d) {
             return id == d.id;
