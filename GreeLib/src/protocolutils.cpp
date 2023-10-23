@@ -9,9 +9,6 @@
 #include <QJsonValue>
 #include <QLoggingCategory>
 
-Q_DECLARE_LOGGING_CATEGORY(ProtocolUtilsLog)
-Q_LOGGING_CATEGORY(ProtocolUtilsLog, "ProtocolUtils")
-
 QByteArray ProtocolUtils::createBindingRequest(const DeviceDescriptor &device)
 {
     QJsonObject json
@@ -77,13 +74,13 @@ bool ProtocolUtils::readPackFromResponse(const QByteArray& response,
                                          const QString& decryptionKey,
                                          QJsonObject& pack)
 {
-    qCDebug(ProtocolUtilsLog) << "reading pack from response:" << response;
+    qDebug() << "reading pack from response:" << response;
 
     QJsonParseError parseError;
     auto&& responseJsonDocument = QJsonDocument::fromJson(response, &parseError);
     if (parseError.error != QJsonParseError::NoError)
     {
-        qCWarning(ProtocolUtilsLog) << "response is not a valid JSON object. Parse error:" << parseError.errorString();
+        qWarning() << "response is not a valid JSON object. Parse error:" << parseError.errorString();
         return false;
     }
 
@@ -92,17 +89,17 @@ bool ProtocolUtils::readPackFromResponse(const QByteArray& response,
     auto&& encryptedPack = responseJson["pack"].toString();
     if (encryptedPack.isEmpty())
     {
-        qCWarning(ProtocolUtilsLog) << "response doesn't have a 'pack' field which is mandatory";
+        qWarning() << "response doesn't have a 'pack' field which is mandatory";
         return false;
     }
-    qCDebug(ProtocolUtilsLog) << "Attempt decrypt with key" << decryptionKey;
+    qDebug() << "Attempt decrypt with key" << decryptionKey;
     auto&& decryptedPack = Crypto::decryptPack(encryptedPack.toUtf8(), decryptionKey);
-    qCDebug(ProtocolUtilsLog) << "decrypted pack:" << decryptedPack;
+    qDebug() << "decrypted pack:" << decryptedPack;
 
     auto&& packJsonDocument = QJsonDocument::fromJson(decryptedPack, &parseError);
     if (parseError.error != QJsonParseError::NoError)
     {
-        qCWarning(ProtocolUtilsLog) << "decrypted pack is not a valid JSON object. Parse error:" << parseError.errorString();
+        qWarning() << "decrypted pack is not a valid JSON object. Parse error:" << parseError.errorString();
         return false;
     }
 
@@ -115,41 +112,41 @@ ProtocolUtils::DeviceParameterMap ProtocolUtils::readStatusMapFromPack(const QJs
 {
     if (pack["t"] != "dat")
     {
-        qCWarning(ProtocolUtilsLog) << "failed to read status map from pack, pack type mismatch:" << pack["t"];
+        qWarning() << "failed to read status map from pack, pack type mismatch:" << pack["t"];
         return{};
     }
 
     auto&& keys = pack["cols"];
     if (!keys.isArray())
     {
-        qCWarning(ProtocolUtilsLog) << "failed to read status map from pack, 'cols' is not an array";
+        qWarning() << "failed to read status map from pack, 'cols' is not an array";
         return{};
     }
 
     auto&& keyArray = keys.toArray();
     if (keyArray.isEmpty())
     {
-        qCWarning(ProtocolUtilsLog) << "failed to read status map from pack, 'cols' is empty";
+        qWarning() << "failed to read status map from pack, 'cols' is empty";
         return{};
     }
 
     auto&& values = pack["dat"];
     if (!values.isArray())
     {
-        qCWarning(ProtocolUtilsLog) << "failed to read status map from pack, 'dat' is not an array";
+        qWarning() << "failed to read status map from pack, 'dat' is not an array";
         return{};
     }
 
     auto&& valueArray = values.toArray();
     if (valueArray.isEmpty())
     {
-        qCWarning(ProtocolUtilsLog) << "failed to read status map from pack, 'dat' is empty";
+        qWarning() << "failed to read status map from pack, 'dat' is empty";
         return{};
     }
 
     if (keyArray.size() != valueArray.size())
     {
-        qCWarning(ProtocolUtilsLog) << "failed to read status map from pack, 'dat' size mismatch";
+        qWarning() << "failed to read status map from pack, 'dat' size mismatch";
         return{};
     }
 

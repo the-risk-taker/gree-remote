@@ -8,9 +8,6 @@
 #include <QUdpSocket>
 #include <QTimer>
 
-Q_DECLARE_LOGGING_CATEGORY(DeviceLog)
-Q_LOGGING_CATEGORY(DeviceLog, "Device")
-
 Device::Device(const DeviceDescriptor &descriptor, QObject *parent)
     : QObject(parent)
     , m_device(descriptor)
@@ -20,7 +17,7 @@ Device::Device(const DeviceDescriptor &descriptor, QObject *parent)
     connect(m_socket, &QUdpSocket::readyRead, this, &Device::onSocketReadyRead);
     connect(m_pollTimer, &QTimer::timeout, this, &Device::onPollTimerTimeout);
 
-    qCInfo(DeviceLog) << "device controller created for" << descriptor.name << "(" << descriptor.id << ")";
+    qInfo() << "device controller created for" << descriptor.name << "(" << descriptor.id << ")";
 
     m_pollTimer->start(2000);
 }
@@ -35,24 +32,24 @@ void Device::deviceRequest(const QByteArray& request)
 {
     openSocket();
     auto written = m_socket->writeDatagram(request, m_device.address, m_device.port);
-    qCDebug(DeviceLog) << m_device.id << "sending request datagram. Written bytes:" << written;
+    qDebug() << m_device.id << "sending request datagram. Written bytes:" << written;
 }
 
 void Device::processStatusUpdateResponse(const QByteArray &response)
 {
-    qCDebug(DeviceLog) << "processing status update response:" << response;
+    qDebug() << "processing status update response:" << response;
 
     QJsonObject pack;
     if (!ProtocolUtils::readPackFromResponse(response, m_device.key, pack))
     {
-        qCWarning(DeviceLog) << "failed read pack from status update response";
+        qWarning() << "failed read pack from status update response";
         return;
     }
 
     auto&& map = ProtocolUtils::readStatusMapFromPack(pack);
     if (map.isEmpty())
     {
-        qCWarning(DeviceLog) << "failed process status update";
+        qWarning() << "failed process status update";
         return;
     }
 
@@ -71,24 +68,24 @@ void Device::processStatusUpdateResponse(const QByteArray &response)
     m_sleepModeEnabled = map["SwhSlp"];
     m_savingModeEnabled = map["SvSt"];
 
-    qCDebug(DeviceLog) << "processing status update done";
+    qDebug() << "processing status update done";
     emit statusUpdated();
 }
 
 void Device::processCommandResponse(const QByteArray& response)
 {
-    qCDebug(DeviceLog) << "processing command response:" << response;
+    qDebug() << "processing command response:" << response;
 
     QJsonObject pack;
     if (!ProtocolUtils::readPackFromResponse(response, m_device.key, pack))
     {
-        qCWarning(DeviceLog) << "failed read pack from command response";
+        qWarning() << "failed read pack from command response";
         return;
     }
 
     if (pack["r"] != 200)
     {
-        qCWarning(DeviceLog) << "command failed. Result:" << pack["r"];
+        qWarning() << "command failed. Result:" << pack["r"];
         return;
     }
 
@@ -111,7 +108,7 @@ void Device::updateStatus()
 {
     if (m_state != State::Idle)
     {
-        qCWarning(DeviceLog) << "device is busy";
+        qWarning() << "device is busy";
         return;
     }
 
@@ -229,7 +226,7 @@ void Device::openSocket()
     if (m_socket->isOpen())
         return;
 
-    qCDebug(DeviceLog) << m_device.id << "opening socket";
+    qDebug() << m_device.id << "opening socket";
     m_socket->open(QIODevice::ReadWrite);
 
     m_state = State::Idle;
@@ -237,10 +234,10 @@ void Device::openSocket()
 
 void Device::onPollTimerTimeout()
 {
-    qCDebug(DeviceLog) << m_device.id << "poll timer timeout";
+    qDebug() << m_device.id << "poll timer timeout";
     if (m_state == State::StatusUpdate)
     {
-        qCInfo(DeviceLog) << "Timeout status update";
+        qInfo() << "Timeout status update";
         m_state = State::Idle;
         updateStatus();
     }
@@ -249,20 +246,20 @@ void Device::onPollTimerTimeout()
 
 void Device::onSocketReadyRead()
 {
-    qCDebug(DeviceLog) << m_device.id << "socket ready read";
+    qDebug() << m_device.id << "socket ready read";
 
     auto&& datagram = m_socket->receiveDatagram();
-    qCDebug(DeviceLog) << "received datagram from" << datagram.senderAddress() << ":" << datagram.senderPort();
+    qDebug() << "received datagram from" << datagram.senderAddress() << ":" << datagram.senderPort();
 
     if (m_state == State::StatusUpdate)
     {
-        qCDebug(DeviceLog) << "Process status update";
+        qDebug() << "Process status update";
         processStatusUpdateResponse(datagram.data());
         m_state = State::Idle;
     }
     else if (m_state == State::Command)
     {
-        qCDebug(DeviceLog) << "Process command";
+        qDebug() << "Process command";
         processCommandResponse(datagram.data());
         m_state = State::Idle;
     }

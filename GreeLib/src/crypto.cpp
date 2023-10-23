@@ -10,15 +10,12 @@
 #include <modes.h>
 using namespace CryptoPP;
 
-Q_DECLARE_LOGGING_CATEGORY(CryptoLog)
-Q_LOGGING_CATEGORY(CryptoLog, "Crypto")
-
 namespace Crypto
 {
 
 QByteArray decryptPack(const QByteArray &packBase64, const QString &key)
 {
-    qCDebug(CryptoLog) << "decrypting pack:" << packBase64;
+    qDebug() << "decrypting pack:" << packBase64;
 
     auto&& pack = QByteArray::fromBase64(packBase64);
 
@@ -28,21 +25,21 @@ QByteArray decryptPack(const QByteArray &packBase64, const QString &key)
     decryptor.MessageEnd();
 
     auto decryptedBytes = decryptor.MaxRetrievable();
-    qCDebug(CryptoLog) << "decrypted data bytes:" << decryptedBytes;
+    qDebug() << "decrypted data bytes:" << decryptedBytes;
 
     std::vector<unsigned char> decrypted;
     decrypted.resize(decryptedBytes);
     decryptor.Get(decrypted.data(), decryptedBytes);
 
     auto&& json = QByteArray(reinterpret_cast<const char*>(decrypted.data()), decryptedBytes);
-    qCDebug(CryptoLog) << "decrypted JSON:" << json;
+    qDebug() << "decrypted JSON:" << json;
 
     return json;
 }
 
 QByteArray encryptPack(const QByteArray &pack, const QString &key)
 {
-    qCDebug(CryptoLog) << "encrypting pack:" << pack;
+    qDebug() << "encrypting pack:" << pack;
 
     QByteArray paddedPack{ pack };
     addPKCS7Padding(paddedPack);
@@ -53,13 +50,13 @@ QByteArray encryptPack(const QByteArray &pack, const QString &key)
     encryptor.MessageEnd();
 
     auto encryptedBytes = encryptor.MaxRetrievable();
-    qCDebug(CryptoLog) << "encrypted data bytes:" << encryptedBytes;
+    qDebug() << "encrypted data bytes:" << encryptedBytes;
 
     QByteArray encrypted(encryptedBytes, 0);
     encryptor.Get(reinterpret_cast<unsigned char*>(encrypted.data()), encryptedBytes);
 
     auto&& packBase64 = encrypted.toBase64();
-    qCDebug(CryptoLog) << "encrypted data:" << packBase64;
+    qDebug() << "encrypted data:" << packBase64;
 
     return packBase64;
 }
