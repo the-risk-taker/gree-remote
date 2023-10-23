@@ -44,3 +44,10 @@ add_subdirectory(GreeLib)
 # greeapp
 add_subdirectory(GreeRemoteGuiQt)
 
+# tools
+get_directory_property(GREE_LIB_SOURCES DIRECTORY GreeLib DEFINITION GREE_LIB_SOURCES)
+get_directory_property(GREE_APP_SOURCES DIRECTORY GreeRemoteGuiQt DEFINITION GREE_APP_SOURCES)
+
+include(cmake/clang-format.cmake)
+include(cmake/cppcheck.cmake)
+include(cmake/clang-tidy.cmake)
