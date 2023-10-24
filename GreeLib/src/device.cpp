@@ -1,18 +1,13 @@
 #include "device.h"
 #include "crypto.h"
 #include "protocolutils.h"
-
 #include <QJsonObject>
 #include <QLoggingCategory>
 #include <QNetworkDatagram>
-#include <QUdpSocket>
 #include <QTimer>
+#include <QUdpSocket>
 
-Device::Device(const DeviceDescriptor &descriptor, QObject *parent)
-    : QObject(parent)
-    , m_device(descriptor)
-    , m_socket(new QUdpSocket(this))
-    , m_pollTimer(new QTimer(this))
+Device::Device(const DeviceDescriptor& descriptor, QObject* parent) : QObject(parent), m_device(descriptor), m_socket(new QUdpSocket(this)), m_pollTimer(new QTimer(this))
 {
     connect(m_socket, &QUdpSocket::readyRead, this, &Device::onSocketReadyRead);
     connect(m_pollTimer, &QTimer::timeout, this, &Device::onPollTimerTimeout);
@@ -35,7 +30,7 @@ void Device::deviceRequest(const QByteArray& request)
     qDebug() << m_device.id << "sending request datagram. Written bytes:" << written;
 }
 
-void Device::processStatusUpdateResponse(const QByteArray &response)
+void Device::processStatusUpdateResponse(const QByteArray& response)
 {
     qDebug() << "processing status update response:" << response;
 
@@ -94,13 +89,13 @@ void Device::processCommandResponse(const QByteArray& response)
 
 void Device::updateFanParameters()
 {
-    setParameters(ParameterMap{
-        { "WdSpd", m_fanSpeed },
-        { "Quiet", m_quiet ? 1 : 0 },
-        { "Tur", m_turbo ? 1 : 0 },
+    setParameters(ParameterMap {
+        {"WdSpd", m_fanSpeed},
+        {"Quiet", m_quiet ? 1 : 0},
+        {"Tur", m_turbo ? 1 : 0},
 
         // TODO figure out what 'NoiseSet' does
-        { "NoiseSet", 0 },
+        {"NoiseSet", 0},
     });
 }
 
@@ -123,44 +118,32 @@ void Device::updateStatus()
 
 void Device::setXfanBlowEnabled(bool enabled)
 {
-    setParameters(ParameterMap{
-        { "Blo", enabled ? 1 : 0 }
-    });
+    setParameters(ParameterMap {{"Blo", enabled ? 1 : 0}});
 }
 
 void Device::setAirModeEnabled(bool enabled)
 {
-    setParameters(ParameterMap{
-        { "Air", enabled ? 1 : 0 }
-                  });
+    setParameters(ParameterMap {{"Air", enabled ? 1 : 0}});
 }
 
 void Device::setSleepModeEnabled(bool enabled)
 {
-    setParameters(ParameterMap{
-        { "SwhSlp", enabled ? 1 : 0 }
-    });
+    setParameters(ParameterMap {{"SwhSlp", enabled ? 1 : 0}});
 }
 
 void Device::setSavingModeEnabled(bool enabled)
 {
-    setParameters(ParameterMap{
-        { "SvSt", enabled ? 1 : 0 }
-    });
+    setParameters(ParameterMap {{"SvSt", enabled ? 1 : 0}});
 }
 
 void Device::setPoweredOn(bool on)
 {
-    setParameters(ParameterMap{
-        { "Pow", on ? 1 : 0 }
-    });
+    setParameters(ParameterMap {{"Pow", on ? 1 : 0}});
 }
 
 void Device::setHealthEnabled(bool enabled)
 {
-    setParameters(ParameterMap{
-        { "Health", enabled ? 1 : 0 }
-    });
+    setParameters(ParameterMap {{"Health", enabled ? 1 : 0}});
 }
 
 void Device::setTurboEnabled(bool enabled)
@@ -177,24 +160,17 @@ void Device::setQuietModeEnabled(bool enabled)
 
 void Device::setLightEnabled(bool enabled)
 {
-    setParameters(ParameterMap{
-        { "Lig", enabled ? 1 : 0 }
-    });
+    setParameters(ParameterMap {{"Lig", enabled ? 1 : 0}});
 }
 
 void Device::setMode(int mode)
 {
-    setParameters(ParameterMap{
-        { "Mod", mode }
-    });
+    setParameters(ParameterMap {{"Mod", mode}});
 }
 
 void Device::setTemperature(int temperature)
 {
-    setParameters(ParameterMap{
-        { "TemUn", 0 },
-        { "SetTem", temperature }
-    });
+    setParameters(ParameterMap {{"TemUn", 0}, {"SetTem", temperature}});
 }
 
 void Device::setFanSpeed(int speed)
@@ -205,9 +181,7 @@ void Device::setFanSpeed(int speed)
 
 void Device::setVerticalSwingMode(int mode)
 {
-    setParameters(ParameterMap{
-        { "SwUpDn", mode }
-    });
+    setParameters(ParameterMap {{"SwUpDn", mode}});
 }
 
 void Device::setParameters(const Device::ParameterMap& parameters)
@@ -241,7 +215,6 @@ void Device::onPollTimerTimeout()
         m_state = State::Idle;
         updateStatus();
     }
-
 }
 
 void Device::onSocketReadyRead()

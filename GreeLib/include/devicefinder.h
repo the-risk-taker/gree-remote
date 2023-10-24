@@ -3,11 +3,9 @@
 
 #include "device.h"
 #include "devicedescriptor.h"
-
-#include <QPointer>
-#include <QObject>
 #include <QByteArray>
-
+#include <QObject>
+#include <QPointer>
 #include <map>
 #include <vector>
 
@@ -18,10 +16,10 @@ class DeviceFinder : public QObject
 {
     Q_OBJECT
 
-public:
+  public:
     using DeviceVector = std::vector<DeviceDescriptor>;
 
-    explicit DeviceFinder(QObject *parent = nullptr);
+    explicit DeviceFinder(QObject* parent = nullptr);
 
     void scan();
     const DeviceVector& availableDevices() const;
@@ -29,13 +27,13 @@ public:
     QPointer<Device> getDevice(const DeviceDescriptor& descriptor);
     QPointer<Device> getDeviceById(const QString& id);
 
-signals:
+  signals:
     void scanFinshed();
     void bindingFinished();
 
     void deviceBound(const DeviceDescriptor& descriptor);
 
-private:
+  private:
     QUdpSocket* m_socket;
     QTimer* m_timer;
 
@@ -53,10 +51,10 @@ private:
     void socketReadyRead();
     void timerTimeout();
 
-    void processScanResponse(const QByteArray response, const QHostAddress &remoteAddress, uint16_t remotePort);
+    void processScanResponse(const QByteArray response, const QHostAddress& remoteAddress, uint16_t remotePort);
 
     void bindDevices();
     void processBindResponse(const QByteArray& response);
 };
 
-#endif // DEVICEHANDLER_H
+#endif   // DEVICEHANDLER_H

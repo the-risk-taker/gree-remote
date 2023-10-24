@@ -1,13 +1,10 @@
 #include "mainwindow.h"
-
-#include <devicefinder.h>
-
 #include <QApplication>
 #include <QLoggingCategory>
 #include <QObject>
+#include <devicefinder.h>
 
-
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     QApplication a(argc, argv);
 
@@ -20,14 +17,10 @@ int main(int argc, char *argv[])
     MainWindow w(dh);
     w.show();
 
-    QObject::connect(&dh, &DeviceFinder::scanFinshed, [] {
-        qInfo() << "scanning finished";
-    });
+    QObject::connect(&dh, &DeviceFinder::scanFinshed, [] { qInfo() << "scanning finished"; });
     QObject::connect(&w, &MainWindow::scanInitiated, &dh, &DeviceFinder::scan);
     QObject::connect(&dh, &DeviceFinder::scanFinshed, &w, &MainWindow::onScanFinished);
-    QObject::connect(&dh, &DeviceFinder::deviceBound, [&w, &dh](const DeviceDescriptor& descriptor) {
-        w.addDevice(dh.getDevice(descriptor));
-    });
+    QObject::connect(&dh, &DeviceFinder::deviceBound, [&w, &dh](const DeviceDescriptor& descriptor) { w.addDevice(dh.getDevice(descriptor)); });
 
     dh.scan();
 

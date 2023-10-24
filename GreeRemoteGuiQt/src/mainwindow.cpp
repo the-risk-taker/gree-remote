@@ -1,9 +1,8 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
 #include "device.h"
-#include "deviceitem.h"
 #include "devicefinder.h"
-
+#include "deviceitem.h"
+#include "ui_mainwindow.h"
 #include <QDebug>
 #include <QDesktopServices>
 #include <QGridLayout>
@@ -14,28 +13,24 @@
 #include <QUrl>
 #include <QVBoxLayout>
 
-MainWindow::MainWindow(DeviceFinder& deviceFinder, QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
-    , m_trayIcon(new QSystemTrayIcon())
-    , m_deviceFinder(deviceFinder)
+MainWindow::MainWindow(DeviceFinder& deviceFinder, QWidget* parent) :
+    QMainWindow(parent),
+    ui(new Ui::MainWindow),
+    m_trayIcon(new QSystemTrayIcon()),
+    m_deviceFinder(deviceFinder)
 {
     ui->setupUi(this);
 
     connect(ui->scanButton, &QPushButton::clicked, this, &MainWindow::onScanButtonClicked);
-    connect(ui->deviceComboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-            this, &MainWindow::onComboBoxIndexChanged);
+    connect(ui->deviceComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::onComboBoxIndexChanged);
     connect(ui->powerOnCheckBox, &QCheckBox::clicked, this, &MainWindow::onPowerCheckBoxClicked);
     connect(ui->healthModeCheckBox, &QCheckBox::clicked, this, &MainWindow::onHealthModeCheckBoxClicked);
     connect(ui->turboModeCheckBox, &QCheckBox::clicked, this, &MainWindow::onTurboModeCheckBoxClicked);
     connect(ui->quietModeCheckBox, &QCheckBox::clicked, this, &MainWindow::onQuietModeCheckBoxClicked);
     connect(ui->lightCheckBox, &QCheckBox::clicked, this, &MainWindow::onLightCheckBoxClicked);
-    connect(ui->modeComboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated),
-            this, &MainWindow::onModeComboBoxActivated);
-    connect(ui->fanSpeedComboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated),
-            this, &MainWindow::onFanSpeedComboBoxActivated);
-    connect(ui->verticalSwingModeComboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated),
-            this, &MainWindow::onVerticalSwingModeComboBoxActivated);
+    connect(ui->modeComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), this, &MainWindow::onModeComboBoxActivated);
+    connect(ui->fanSpeedComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), this, &MainWindow::onFanSpeedComboBoxActivated);
+    connect(ui->verticalSwingModeComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), this, &MainWindow::onVerticalSwingModeComboBoxActivated);
     connect(ui->setTempButton, &QPushButton::clicked, this, &MainWindow::onSetTempButtonClicked);
     connect(ui->xfanCheckBox, &QCheckBox::clicked, this, &MainWindow::onXfanCheckBoxClicked);
     connect(ui->airModeCheckBox, &QCheckBox::clicked, this, &MainWindow::onAirModeCheckBoxClicked);
@@ -44,7 +39,7 @@ MainWindow::MainWindow(DeviceFinder& deviceFinder, QWidget *parent)
 
     connect(ui->flaticonCreditsLabel, &QLabel::linkActivated, this, &MainWindow::onLabelLinkClicked);
 
-    QIcon icon{ ":/icon-v2" };
+    QIcon icon {":/icon-v2"};
 
     // Mask makes possible to render the icon properly on Dark menu bars
     icon.setIsMask(true);
@@ -58,18 +53,14 @@ MainWindow::MainWindow(DeviceFinder& deviceFinder, QWidget *parent)
         m_scanAction->setEnabled(false);
     });
 
-    auto trayMenu = new QMenu{ this };
+    auto trayMenu = new QMenu {this};
     trayMenu->addAction(m_scanAction);
 
-    trayMenu->addAction("Preferences...", [this] {
-        show();
-    });
+    trayMenu->addAction("Preferences...", [this] { show(); });
 
     trayMenu->addSeparator();
     m_separatorAction = trayMenu->addSeparator();
-    trayMenu->addAction("Quit", [] {
-        qApp->exit();
-    });
+    trayMenu->addAction("Quit", [] { qApp->exit(); });
 
     m_trayIcon->setContextMenu(trayMenu);
 }
@@ -93,18 +84,15 @@ void MainWindow::onScanFinished()
     ui->scanButton->setEnabled(true);
 }
 
-void MainWindow::onBindingFinished()
-{
+void MainWindow::onBindingFinished() {}
 
-}
-
-void MainWindow::createDeviceMenuItem(const QPointer<Device> &device)
+void MainWindow::createDeviceMenuItem(const QPointer<Device>& device)
 {
     if (!device)
         return;
 
     auto&& contextMenu = m_trayIcon->contextMenu();
-//    contextMenu->addSeparator();
+    //    contextMenu->addSeparator();
 
     auto&& deviceMenu = new QMenu(contextMenu);
     deviceMenu->setTitle(device->descritptor().name);
@@ -113,56 +101,46 @@ void MainWindow::createDeviceMenuItem(const QPointer<Device> &device)
     auto powerAction = new QAction(deviceMenu);
     powerAction->setText("Power: Off");
     powerAction->setCheckable(true);
-    connect(powerAction, &QAction::toggled, [powerAction] {
-        powerAction->setText(powerAction->isChecked() ? "Power: On" : "Power: Off");
-    });
+    connect(powerAction, &QAction::toggled, [powerAction] { powerAction->setText(powerAction->isChecked() ? "Power: On" : "Power: Off"); });
 
     deviceMenu->addAction(powerAction);
 
     auto modeAction = new QAction(deviceMenu);
     modeAction->setText("Mode: fan");
     auto modeMenu = new QMenu(deviceMenu);
-    modeMenu->addAction("Fan", [modeAction] {
-        modeAction->setText("Mode: fan");
-    });
-    modeMenu->addAction("Cool", [modeAction] {
-        modeAction->setText("Mode: cool");
-    });
-    modeMenu->addAction("Heat", [modeAction] {
-        modeAction->setText("Mode: heat");
-    });
-    modeMenu->addAction("Dry", [modeAction] {
-        modeAction->setText("Mode: dry");
-    });
+    modeMenu->addAction("Fan", [modeAction] { modeAction->setText("Mode: fan"); });
+    modeMenu->addAction("Cool", [modeAction] { modeAction->setText("Mode: cool"); });
+    modeMenu->addAction("Heat", [modeAction] { modeAction->setText("Mode: heat"); });
+    modeMenu->addAction("Dry", [modeAction] { modeAction->setText("Mode: dry"); });
     modeAction->setMenu(modeMenu);
     deviceMenu->addAction(modeAction);
 
-//    auto w = new QWidget(contextMenu);
-//    auto l = new QVBoxLayout;
+    //    auto w = new QWidget(contextMenu);
+    //    auto l = new QVBoxLayout;
 
-//    l->setSpacing(0);
-//    l->setContentsMargins(15, 4, 4, 4);
+    //    l->setSpacing(0);
+    //    l->setContentsMargins(15, 4, 4, 4);
 
-//    w->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-//    w->setLayout(l);
+    //    w->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+    //    w->setLayout(l);
 
-//    auto buttonLayout = new QHBoxLayout;
-//    buttonLayout->setContentsMargins(0, 0, 0, 0);
-//    buttonLayout->addWidget(new QPushButton("Up", w));
-//    buttonLayout->addWidget(new QPushButton("Down", w));
-//    l->addLayout(buttonLayout);
+    //    auto buttonLayout = new QHBoxLayout;
+    //    buttonLayout->setContentsMargins(0, 0, 0, 0);
+    //    buttonLayout->addWidget(new QPushButton("Up", w));
+    //    buttonLayout->addWidget(new QPushButton("Down", w));
+    //    l->addLayout(buttonLayout);
 
-//    auto action = new QWidgetAction(contextMenu);
-//    action->setDefaultWidget(w);
+    //    auto action = new QWidgetAction(contextMenu);
+    //    action->setDefaultWidget(w);
 
     auto action = new DeviceItem(device, contextMenu);
     deviceMenu->addAction(action);
-    //contextMenu->installEventFilter(action);
+    // contextMenu->installEventFilter(action);
 }
 
 void MainWindow::onLabelLinkClicked(const QString& link)
 {
-    QDesktopServices::openUrl({ link });
+    QDesktopServices::openUrl({link});
 }
 
 void MainWindow::createDeviceTableEntry(const QPointer<Device>& device)

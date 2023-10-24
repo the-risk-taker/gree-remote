@@ -1,20 +1,15 @@
 #include "devicefinder.h"
 #include "crypto.h"
 #include "protocolutils.h"
-
 #include <QDebug>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QLoggingCategory>
 #include <QTimer>
 #include <QUdpSocket>
-
 #include <stdexcept>
 
-DeviceFinder::DeviceFinder(QObject *parent)
-    : QObject(parent)
-    , m_socket(new QUdpSocket(this))
-    , m_timer(new QTimer(this))
+DeviceFinder::DeviceFinder(QObject* parent) : QObject(parent), m_socket(new QUdpSocket(this)), m_timer(new QTimer(this))
 {
     qDebug() << "initializing";
 
@@ -42,18 +37,18 @@ void DeviceFinder::scan()
         m_socket->open(QIODevice::ReadWrite);
     }
 
-    auto written = m_socket->writeDatagram(R"({"t":"scan"})", QHostAddress{ "192.168.1.255" }, 7000);
+    auto written = m_socket->writeDatagram(R"({"t":"scan"})", QHostAddress {"192.168.1.255"}, 7000);
     qDebug() << "written datagram length:" << written;
 
     m_timer->start(2000);
 }
 
-const DeviceFinder::DeviceVector &DeviceFinder::availableDevices() const
+const DeviceFinder::DeviceVector& DeviceFinder::availableDevices() const
 {
     return m_descriptors;
 }
 
-QPointer<Device> DeviceFinder::getDevice(const DeviceDescriptor &descriptor)
+QPointer<Device> DeviceFinder::getDevice(const DeviceDescriptor& descriptor)
 {
     return getDeviceById(descriptor.id);
 }
@@ -66,9 +61,7 @@ QPointer<Device> DeviceFinder::getDeviceById(const QString& id)
     }
     catch (std::out_of_range&)
     {
-        auto&& existing = std::find_if(m_descriptors.cbegin(), m_descriptors.cend(), [&id](const DeviceDescriptor& d) {
-            return id == d.id;
-        });
+        auto&& existing = std::find_if(m_descriptors.cbegin(), m_descriptors.cend(), [&id](const DeviceDescriptor& d) { return id == d.id; });
 
         if (existing == m_descriptors.cend())
         {
@@ -86,7 +79,7 @@ void DeviceFinder::socketReadyRead()
 {
     qDebug() << "socket ready read";
 
-    char datagram[65536] = { 0 };
+    char datagram[65536] = {0};
     QHostAddress remoteAddress;
     uint16_t remotePort = 0;
     auto length = m_socket->readDatagram(datagram, sizeof(datagram), &remoteAddress, &remotePort);
@@ -144,9 +137,7 @@ void DeviceFinder::processScanResponse(const QByteArray response, const QHostAdd
 
     auto&& id = pack["cid"].toString();
 
-    auto&& existing = std::find_if(m_descriptors.cbegin(), m_descriptors.cend(), [&id](const DeviceDescriptor& descriptor) {
-        return descriptor.id == id;
-    });
+    auto&& existing = std::find_if(m_descriptors.cbegin(), m_descriptors.cend(), [&id](const DeviceDescriptor& descriptor) { return descriptor.id == id; });
 
     if (existing != m_descriptors.cend())
     {
@@ -194,18 +185,20 @@ void DeviceFinder::bindDevices()
         m_socket->writeDatagram(request, device.address, device.port);
     });
 
-    if (hasPending){
+    if (hasPending)
+    {
         m_timer->start();
     }
-    else{
-        //end bind state - nothing new to bind.
+    else
+    {
+        // end bind state - nothing new to bind.
         qDebug() << "binding finished without new devices found";
 
         m_state = State::Idle;
     }
 }
 
-void DeviceFinder::processBindResponse(const QByteArray &response)
+void DeviceFinder::processBindResponse(const QByteArray& response)
 {
     qDebug() << "processing bind response:" << response;
 
@@ -227,9 +220,7 @@ void DeviceFinder::processBindResponse(const QByteArray &response)
         return;
     }
 
-    auto&& device = std::find_if(m_descriptors.begin(), m_descriptors.end(), [&mac](const DeviceDescriptor& dev) {
-        return dev.id == mac;
-    });
+    auto&& device = std::find_if(m_descriptors.begin(), m_descriptors.end(), [&mac](const DeviceDescriptor& dev) { return dev.id == mac; });
 
     if (device == m_descriptors.end())
     {

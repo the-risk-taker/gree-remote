@@ -1,10 +1,9 @@
 #ifndef PROTOCOLUTILS_H
 #define PROTOCOLUTILS_H
 
+#include "devicedescriptor.h"
 #include <QByteArray>
 #include <QMap>
-
-#include "devicedescriptor.h"
 
 namespace ProtocolUtils
 {
@@ -15,11 +14,9 @@ namespace ProtocolUtils
     QByteArray createDeviceStatusRequestPack(const QString& id);
     QByteArray createDeviceCommandPack(const DeviceParameterMap& parameters);
 
-    bool readPackFromResponse(const QByteArray& response,
-                              const QString& decryptionKey,
-                              QJsonObject& pack);
+    bool readPackFromResponse(const QByteArray& response, const QString& decryptionKey, QJsonObject& pack);
 
     DeviceParameterMap readStatusMapFromPack(const QJsonObject& pack);
-}
+}   // namespace ProtocolUtils
 
-#endif // PROTOCOLUTILS_H
+#endif   // PROTOCOLUTILS_H

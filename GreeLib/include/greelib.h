@@ -1,12 +1,10 @@
 #ifndef GREELIB_H
 #define GREELIB_H
 
-
 class GreeLib
 {
-
-public:
+  public:
     GreeLib();
 };
 
-#endif // GREELIB_H
+#endif   // GREELIB_H

@@ -1,78 +1,57 @@
 #include "protocolutils.h"
 #include "crypto.h"
-
-#include <algorithm>
-
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QLoggingCategory>
+#include <algorithm>
 
-QByteArray ProtocolUtils::createBindingRequest(const DeviceDescriptor &device)
+QByteArray ProtocolUtils::createBindingRequest(const DeviceDescriptor& device)
 {
-    QJsonObject json
-    {
-        { "mac", device.id },
-        { "t", "bind" },
-        { "uid", 0 }
-    };
+    QJsonObject json {{"mac", device.id}, {"t", "bind"}, {"uid", 0}};
 
-    return QJsonDocument{ json }.toJson(QJsonDocument::Compact);
+    return QJsonDocument {json}.toJson(QJsonDocument::Compact);
 }
 
-QByteArray ProtocolUtils::createDeviceRequest(const QByteArray &encryptedPack, int i)
+QByteArray ProtocolUtils::createDeviceRequest(const QByteArray& encryptedPack, int i)
 {
-    QJsonObject json
-    {
-        { "cid", "app" },
-        { "i", i },
-        { "t", "pack" },
-        { "uid", 0 },
-        { "pack", QString::fromUtf8(encryptedPack) }
-    };
+    QJsonObject json {{"cid", "app"}, {"i", i}, {"t", "pack"}, {"uid", 0}, {"pack", QString::fromUtf8(encryptedPack)}};
 
-    return QJsonDocument{ json }.toJson(QJsonDocument::Compact);
+    return QJsonDocument {json}.toJson(QJsonDocument::Compact);
 }
 
 QByteArray ProtocolUtils::createDeviceStatusRequestPack(const QString& id)
 {
     // TODO move these keys to constants
 
-    QJsonObject json
-    {
-        { "cols", QJsonArray {
-                "Pow",
-                "Mod",
-                "SetTem",
-                "WdSpd",
-                "Air",
-                "Blo",
-                "Health",
-                "SwhSlp",
-                "Lig",
-                "SwingLfRig",
-                "SwUpDn",
-                "Quiet",
-                "Tur",
-                "StHt",
-                "TemUn",
-                "HeatCoolType",
-                "TemRec",
-                "SvSt",
-                "NoiseSet"
-            }
-        },
-        { "mac", id },
-        { "t", "status" }
-    };
+    QJsonObject json {{"cols",
+                       QJsonArray {"Pow",
+                                   "Mod",
+                                   "SetTem",
+                                   "WdSpd",
+                                   "Air",
+                                   "Blo",
+                                   "Health",
+                                   "SwhSlp",
+                                   "Lig",
+                                   "SwingLfRig",
+                                   "SwUpDn",
+                                   "Quiet",
+                                   "Tur",
+                                   "StHt",
+                                   "TemUn",
+                                   "HeatCoolType",
+                                   "TemRec",
+                                   "SvSt",
+                                   "NoiseSet"}},
+                      {"mac", id},
+                      {"t", "status"}};
 
-    return QJsonDocument{ json }.toJson(QJsonDocument::Compact);
+    return QJsonDocument {json}.toJson(QJsonDocument::Compact);
 }
 
-bool ProtocolUtils::readPackFromResponse(const QByteArray& response,
-                                         const QString& decryptionKey,
-                                         QJsonObject& pack)
+bool ProtocolUtils::readPackFromResponse(const QByteArray& response, const QString& decryptionKey, QJsonObject& pack)
 {
     qDebug() << "reading pack from response:" << response;
 
@@ -113,41 +92,41 @@ ProtocolUtils::DeviceParameterMap ProtocolUtils::readStatusMapFromPack(const QJs
     if (pack["t"] != "dat")
     {
         qWarning() << "failed to read status map from pack, pack type mismatch:" << pack["t"];
-        return{};
+        return {};
     }
 
     auto&& keys = pack["cols"];
     if (!keys.isArray())
     {
         qWarning() << "failed to read status map from pack, 'cols' is not an array";
-        return{};
+        return {};
     }
 
     auto&& keyArray = keys.toArray();
     if (keyArray.isEmpty())
     {
         qWarning() << "failed to read status map from pack, 'cols' is empty";
-        return{};
+        return {};
     }
 
     auto&& values = pack["dat"];
     if (!values.isArray())
     {
         qWarning() << "failed to read status map from pack, 'dat' is not an array";
-        return{};
+        return {};
     }
 
     auto&& valueArray = values.toArray();
     if (valueArray.isEmpty())
     {
         qWarning() << "failed to read status map from pack, 'dat' is empty";
-        return{};
+        return {};
     }
 
     if (keyArray.size() != valueArray.size())
     {
         qWarning() << "failed to read status map from pack, 'dat' size mismatch";
-        return{};
+        return {};
     }
 
     DeviceParameterMap map;
@@ -160,22 +139,14 @@ ProtocolUtils::DeviceParameterMap ProtocolUtils::readStatusMapFromPack(const QJs
 QByteArray ProtocolUtils::createDeviceCommandPack(const ProtocolUtils::DeviceParameterMap& parameters)
 {
     if (parameters.isEmpty())
-        return{};
+        return {};
 
     QVariantList variantValues;
     auto&& intValues = parameters.values();
 
-    std::transform(std::begin(intValues),
-                   std::end(intValues),
-                   std::back_inserter(variantValues),
-                   [](int value) { return QVariant{ value }; });
+    std::transform(std::begin(intValues), std::end(intValues), std::back_inserter(variantValues), [](int value) { return QVariant {value}; });
 
-    QJsonObject json
-    {
-        { "opt", QJsonArray::fromStringList(parameters.keys()) },
-        { "p", QJsonArray::fromVariantList(variantValues) },
-        { "t", "cmd" }
-    };
+    QJsonObject json {{"opt", QJsonArray::fromStringList(parameters.keys())}, {"p", QJsonArray::fromVariantList(variantValues)}, {"t", "cmd"}};
 
-    return QJsonDocument{ json }.toJson(QJsonDocument::Compact);
+    return QJsonDocument {json}.toJson(QJsonDocument::Compact);
 }

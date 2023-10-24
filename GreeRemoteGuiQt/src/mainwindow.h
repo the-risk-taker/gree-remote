@@ -9,16 +9,17 @@ class DeviceFinder;
 class QAction;
 class QSystemTrayIcon;
 
-namespace Ui {
-class MainWindow;
+namespace Ui
+{
+    class MainWindow;
 }
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-public:
-    MainWindow(DeviceFinder& deviceFinder, QWidget *parent = 0);
+  public:
+    MainWindow(DeviceFinder& deviceFinder, QWidget* parent = 0);
     ~MainWindow();
 
     void addDevice(const QPointer<Device>& device);
@@ -26,11 +27,11 @@ public:
     void onScanFinished();
     void onBindingFinished();
 
-signals:
+  signals:
     void scanInitiated();
 
-private:
-    Ui::MainWindow *ui;
+  private:
+    Ui::MainWindow* ui;
     QSystemTrayIcon* m_trayIcon;
     QAction* m_scanAction;
     QAction* m_separatorAction;
@@ -63,4 +64,4 @@ private:
     void onSavingModeCheckBoxClicked();
 };
 
-#endif // MAINWINDOW_H
+#endif   // MAINWINDOW_H

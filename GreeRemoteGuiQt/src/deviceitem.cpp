@@ -3,37 +3,35 @@
 #include "mac/macnativelabel.h"
 #endif
 
-#include <QEvent>
 #include <QDebug>
+#include <QEvent>
 #include <QGridLayout>
 #include <QLabel>
 #include <QPushButton>
 #include <QSlider>
 
-DeviceItem::DeviceItem(const QPointer<Device> &device, QObject *parent)
-    : QWidgetAction(parent)
-    , m_device(device)
+DeviceItem::DeviceItem(const QPointer<Device>& device, QObject* parent) : QWidgetAction(parent), m_device(device)
 {
-//    installEventFilter(this);
+    //    installEventFilter(this);
 
-//    startTimer(100);
+    //    startTimer(100);
 }
 
-QWidget *DeviceItem::createWidget(QWidget *parent)
+QWidget* DeviceItem::createWidget(QWidget* parent)
 {
     if (m_widget)
         return m_widget;
 
     parent->installEventFilter(this);
 
-//    auto&& contextMenu = m_trayIcon->contextMenu();
-//    contextMenu->addSeparator();
+    //    auto&& contextMenu = m_trayIcon->contextMenu();
+    //    contextMenu->addSeparator();
 
-//    auto&& deviceMenu = new QMenu(contextMenu);
-//    deviceMenu->setTitle(device->descritptor().name);
-//    contextMenu->addMenu(deviceMenu);
-//    deviceMenu->addAction("Power on", []{});
-//    deviceMenu->addAction("Power off", []{});
+    //    auto&& deviceMenu = new QMenu(contextMenu);
+    //    deviceMenu->setTitle(device->descritptor().name);
+    //    contextMenu->addMenu(deviceMenu);
+    //    deviceMenu->addAction("Power on", []{});
+    //    deviceMenu->addAction("Power off", []{});
 
     m_widget = new QWidget(parent);
     auto l = new QVBoxLayout;
@@ -61,9 +59,7 @@ QWidget *DeviceItem::createWidget(QWidget *parent)
 #endif
 
     label->setMinimumWidth(30);
-    connect(slider, &QSlider::valueChanged, [label](int value) {
-        label->setText(QString{ "%1 C" }.arg(value));
-    });
+    connect(slider, &QSlider::valueChanged, [label](int value) { label->setText(QString {"%1 C"}.arg(value)); });
 
     buttonLayout->addWidget(slider);
     buttonLayout->addWidget(label);
@@ -72,8 +68,8 @@ QWidget *DeviceItem::createWidget(QWidget *parent)
 
     return m_widget;
 
-//    auto action = new QWidgetAction(contextMenu);
-//    action->setDefaultWidget(w);
+    //    auto action = new QWidgetAction(contextMenu);
+    //    action->setDefaultWidget(w);
     //    m_trayIcon->contextMenu()->addAction(action);
 }
 
@@ -81,8 +77,8 @@ bool DeviceItem::event(QEvent* e)
 {
     qInfo() << "DeviceItem::event:" << e->type();
 
-//    if (e->type() == QEvent::Timer)
-//        m_widget->update();
+    //    if (e->type() == QEvent::Timer)
+    //        m_widget->update();
 
     return QWidgetAction::event(e);
 }

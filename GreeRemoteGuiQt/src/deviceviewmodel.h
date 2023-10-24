@@ -10,15 +10,15 @@ class DeviceViewModel : public QObject
 {
     Q_OBJECT
 
-public:
-    DeviceViewModel(const QPointer<Device>& device, QObject *parent = nullptr);
+  public:
+    DeviceViewModel(const QPointer<Device>& device, QObject* parent = nullptr);
 
-signals:
+  signals:
 
-public slots:
+  public slots:
 
-private:
+  private:
     QPointer<Device> m_device;
 };
 
-#endif // DEVICEVIEWMODEL_H
+#endif   // DEVICEVIEWMODEL_H

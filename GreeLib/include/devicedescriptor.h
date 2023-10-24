@@ -16,4 +16,4 @@ struct DeviceDescriptor
     QString id;
 };
 
-#endif // DEVICEDESCRIPTOR_H
+#endif   // DEVICEDESCRIPTOR_H
