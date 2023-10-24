@@ -1,3 +1,3 @@
 #include "greelib.h"
 
-GreeLib::GreeLib() {}
+GreeLib::GreeLib() = default;

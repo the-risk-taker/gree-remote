@@ -79,22 +79,22 @@ void DeviceFinder::socketReadyRead()
 {
     qDebug() << "socket ready read";
 
-    char datagram[65536] = {0};
+    std::array<char, 65536> datagram = {0};
     QHostAddress remoteAddress;
     uint16_t remotePort = 0;
-    auto length = m_socket->readDatagram(datagram, sizeof(datagram), &remoteAddress, &remotePort);
+    auto length = m_socket->readDatagram(datagram.data(), sizeof(datagram), &remoteAddress, &remotePort);
     qDebug() << "received datagram from" << remoteAddress << ":" << remotePort << ", length:" << length;
 
     if (m_state == State::Scanning)
     {
         qDebug() << "processing scan results";
-        processScanResponse(QByteArray(datagram, length), remoteAddress, remotePort);
+        processScanResponse(QByteArray(datagram.data(), length), remoteAddress, remotePort);
         m_timer->start();
     }
     else if (m_state == State::Binding)
     {
         qDebug() << "processing bind results";
-        processBindResponse(QByteArray(datagram, length));
+        processBindResponse(QByteArray(datagram.data(), length));
         m_timer->start();
     }
 }

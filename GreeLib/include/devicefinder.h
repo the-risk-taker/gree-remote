@@ -22,7 +22,7 @@ class DeviceFinder : public QObject
     explicit DeviceFinder(QObject* parent = nullptr);
 
     void scan();
-    const DeviceVector& availableDevices() const;
+    [[nodiscard]] const DeviceVector& availableDevices() const;
 
     QPointer<Device> getDevice(const DeviceDescriptor& descriptor);
     QPointer<Device> getDeviceById(const QString& id);

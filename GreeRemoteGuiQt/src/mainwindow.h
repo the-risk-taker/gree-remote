@@ -19,8 +19,8 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
   public:
-    MainWindow(DeviceFinder& deviceFinder, QWidget* parent = 0);
-    ~MainWindow();
+    MainWindow(DeviceFinder& deviceFinder, QWidget* parent = nullptr);
+    ~MainWindow() override;
 
     void addDevice(const QPointer<Device>& device);
 
