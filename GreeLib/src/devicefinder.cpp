@@ -43,11 +43,6 @@ void DeviceFinder::scan()
     m_timer->start(2000);
 }
 
-const DeviceFinder::DeviceVector& DeviceFinder::availableDevices() const
-{
-    return m_descriptors;
-}
-
 QPointer<Device> DeviceFinder::getDevice(const DeviceDescriptor& descriptor)
 {
     return getDeviceById(descriptor.id);
@@ -124,7 +119,7 @@ void DeviceFinder::timerTimeout()
     }
 }
 
-void DeviceFinder::processScanResponse(const QByteArray response, const QHostAddress& remoteAddress, uint16_t remotePort)
+void DeviceFinder::processScanResponse(const QByteArray& response, const QHostAddress& remoteAddress, uint16_t remotePort)
 {
     qDebug() << "processing scan response" << response;
 
@@ -233,5 +228,5 @@ void DeviceFinder::processBindResponse(const QByteArray& response)
 
     qDebug() << "device bound:" << mac;
 
-    emit deviceBound(*device);
+    emit(deviceBound(*device));
 }

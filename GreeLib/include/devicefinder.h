@@ -22,7 +22,6 @@ class DeviceFinder : public QObject
     explicit DeviceFinder(QObject* parent = nullptr);
 
     void scan();
-    [[nodiscard]] const DeviceVector& availableDevices() const;
 
     QPointer<Device> getDevice(const DeviceDescriptor& descriptor);
     QPointer<Device> getDeviceById(const QString& id);
@@ -51,7 +50,7 @@ class DeviceFinder : public QObject
     void socketReadyRead();
     void timerTimeout();
 
-    void processScanResponse(const QByteArray response, const QHostAddress& remoteAddress, uint16_t remotePort);
+    void processScanResponse(const QByteArray& response, const QHostAddress& remoteAddress, uint16_t remotePort);
 
     void bindDevices();
     void processBindResponse(const QByteArray& response);

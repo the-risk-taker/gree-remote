@@ -84,8 +84,6 @@ void MainWindow::onScanFinished()
     ui->scanButton->setEnabled(true);
 }
 
-void MainWindow::onBindingFinished() {}
-
 void MainWindow::createDeviceMenuItem(const QPointer<Device>& device)
 {
     if (!device)

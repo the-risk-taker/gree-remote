@@ -10,16 +10,13 @@ class Device;
 class DeviceItem : public QWidgetAction
 {
   public:
-    DeviceItem(const QPointer<Device>& device, QObject* parent = nullptr);
-
-    QWidget* createWidget(QWidget* parent) override;
+    explicit DeviceItem(const QPointer<Device>& device, QObject* parent = nullptr);
 
   protected:
     bool event(QEvent* e) override;
     bool eventFilter(QObject* o, QEvent* e) override;
 
   private:
-    QWidget* m_widget = nullptr;
     const QPointer<Device> m_device;
 };
 

@@ -11,11 +11,7 @@ class DeviceViewModel : public QObject
     Q_OBJECT
 
   public:
-    DeviceViewModel(const QPointer<Device>& device, QObject* parent = nullptr);
-
-  signals:
-
-  public slots:
+    explicit DeviceViewModel(const QPointer<Device>& device, QObject* parent = nullptr);
 
   private:
     QPointer<Device> m_device;

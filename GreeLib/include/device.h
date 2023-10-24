@@ -13,7 +13,7 @@ class Device : public QObject
     Q_OBJECT
 
   public:
-    Device(const DeviceDescriptor& descriptor, QObject* parent = nullptr);
+    explicit Device(const DeviceDescriptor& descriptor, QObject* parent = nullptr);
     ~Device() override;
 
     [[nodiscard]] const DeviceDescriptor& descritptor() const
@@ -130,8 +130,6 @@ class Device : public QObject
 
   signals:
     void statusUpdated();
-
-  public slots:
 
   private:
     enum class State
